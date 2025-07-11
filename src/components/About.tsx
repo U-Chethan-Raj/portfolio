@@ -50,18 +50,37 @@ const About = () => {
             <div className="card-gradient rounded-2xl p-8 shadow-card">
               <h3 className="text-2xl font-semibold mb-4">My Journey</h3>
               <div className="space-y-4 text-muted-foreground">
+                <div className="group cursor-pointer" onClick={() => window.open('/blog/web-development-experience', '_blank')}>
+                  <p className="hover:text-foreground transition-smooth">
+                    <span className="font-semibold text-primary">5+ years of experience</span> in web development, 
+                    specializing in creating robust and scalable applications. My journey has been marked by 
+                    continuous learning and innovation in the ever-evolving tech landscape.
+                    <span className="text-primary ml-2 opacity-0 group-hover:opacity-100 transition-smooth">→ Read more</span>
+                  </p>
+                </div>
+                
+                <div className="group cursor-pointer" onClick={() => window.open('/blog/react-expertise', '_blank')}>
+                  <p className="hover:text-foreground transition-smooth">
+                    <span className="font-semibold text-primary">Expertise in React, Node.js, and modern JavaScript frameworks</span> 
+                    enables me to build dynamic, responsive applications that users love. I stay current with the latest 
+                    technologies and best practices.
+                    <span className="text-primary ml-2 opacity-0 group-hover:opacity-100 transition-smooth">→ Read more</span>
+                  </p>
+                </div>
+                
                 <p>
-                  Started my coding journey in 2019 with a simple "Hello World" and never looked back. 
-                  What began as curiosity quickly became a passion for creating impactful digital experiences.
+                  <span className="font-semibold text-primary">Strong background in user experience design and interface development</span> 
+                  helps me create intuitive and engaging digital experiences that bridge the gap between functionality and aesthetics.
                 </p>
+                
                 <p>
-                  I specialize in full-stack development with expertise in modern JavaScript frameworks, 
-                  cloud technologies, and user experience design. I believe in writing clean, maintainable 
-                  code and creating intuitive user interfaces.
+                  <span className="font-semibold text-primary">Proven track record of delivering scalable web applications</span> 
+                  that handle real-world challenges and scale with business growth. I focus on performance, security, and maintainability.
                 </p>
+                
                 <p>
-                  When I'm not coding, you'll find me exploring new technologies, contributing to open source, 
-                  or sharing knowledge through tech talks and blog posts.
+                  <span className="font-semibold text-primary">Passionate about creating efficient, user-centered digital solutions</span> 
+                  that make a meaningful impact. I believe technology should serve people and solve real problems.
                 </p>
               </div>
             </div>

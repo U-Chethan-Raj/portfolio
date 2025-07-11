@@ -71,8 +71,41 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
+  .light {
+    /* Light theme colors */
+    --background: 0 0% 100%;
+    --foreground: 220 15% 7%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 15% 7%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 15% 7%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 13% 96%;
+    --secondary-foreground: 220 15% 7%;
+    --muted: 220 13% 96%;
+    --muted-foreground: 220 15% 40%;
+    --accent: 217 91% 60%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 217 91% 60%;
+    
+    /* Light mode gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(217 100% 70%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(220 13% 96%) 50%, hsl(217 91% 60% / 0.1) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100% / 0.8) 0%, hsl(220 13% 96% / 0.6) 100%);
+    
+    /* Light mode shadows */
+    --shadow-elegant: 0 10px 40px -10px hsl(217 91% 60% / 0.2);
+    --shadow-card: 0 8px 32px -8px hsl(220 15% 7% / 0.1);
+    --shadow-glow: 0 0 40px hsl(217 100% 70% / 0.3);
+  }
+
   .dark {
-    /* Same as light mode - we're using dark theme as default */
+    /* Same as root - we're using dark theme as default */
     --background: 220 15% 7%;
     --foreground: 210 40% 98%;
     --card: 220 13% 11%;

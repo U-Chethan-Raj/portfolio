@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Github, Linkedin, Mail, ArrowUp } from "lucide-react";
 
-const Footer = () => {
+const Footer = ({ onAdminClick }: { onAdminClick?: () => void }) => {
   const currentYear = new Date().getFullYear();
 
   const scrollToTop = () => {
@@ -49,10 +49,19 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-border mt-8 pt-8 text-center">
-          <p className="text-muted-foreground">
+        <div className="border-t border-border mt-8 pt-8 flex justify-between items-center">
+          <button 
+            onClick={onAdminClick}
+            className="text-sm text-muted-foreground hover:text-primary transition-smooth cursor-pointer"
+          >
             © {currentYear} Chethan Raj. All rights reserved. Built with ❤️ and React
-          </p>
+          </button>
+          
+          <div className="text-sm text-muted-foreground">
+            <a href="#" className="hover:text-primary transition-smooth">Blog</a>
+            <span className="mx-2">•</span>
+            <a href="#" className="hover:text-primary transition-smooth">Privacy</a>
+          </div>
         </div>
       </div>
     </footer>
