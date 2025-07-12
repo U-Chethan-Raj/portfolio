@@ -190,11 +190,24 @@ const CV = () => {
               {cvSections[currentSlide].content.details.map((detail, index) => (
                 <div 
                   key={index} 
-                  className="flex items-start gap-3 p-3 rounded-lg bg-card/30 backdrop-blur-sm border border-border/30 hover:bg-card/50 transition-smooth"
+                  className="flex items-start gap-3 p-3 rounded-lg bg-card/30 backdrop-blur-sm border border-border/30 hover:bg-card/50 transition-smooth cursor-pointer group"
                   style={{ animationDelay: `${index * 0.1}s` }}
+                  onClick={() => {
+                    const blogSlug = cvSections[currentSlide].title === "Professional Summary" && index === 0 ? "web-development-experience" :
+                                   cvSections[currentSlide].title === "Technical Skills" && index === 0 ? "react-expertise" : null;
+                    if (blogSlug) window.location.href = `/blog/${blogSlug}`;
+                  }}
                 >
                   <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
-                  <p className="text-muted-foreground leading-relaxed">{detail}</p>
+                  <div className="flex-1">
+                    <p className="text-muted-foreground leading-relaxed group-hover:text-foreground transition-smooth">{detail}</p>
+                    {((cvSections[currentSlide].title === "Professional Summary" && index === 0) || 
+                      (cvSections[currentSlide].title === "Technical Skills" && index === 0)) && (
+                      <span className="text-xs text-primary opacity-0 group-hover:opacity-100 transition-smooth mt-1 block">
+                        Click to know more →
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

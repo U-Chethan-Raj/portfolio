@@ -8,14 +8,16 @@ export const ThemeToggle = () => {
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme") as "light" | "dark" || "dark";
     setTheme(savedTheme);
-    document.documentElement.classList.toggle("light", savedTheme === "light");
+    document.documentElement.classList.remove("light", "dark");
+    document.documentElement.classList.add(savedTheme);
   }, []);
 
   const toggleTheme = () => {
     const newTheme = theme === "dark" ? "light" : "dark";
     setTheme(newTheme);
     localStorage.setItem("theme", newTheme);
-    document.documentElement.classList.toggle("light", newTheme === "light");
+    document.documentElement.classList.remove("light", "dark");
+    document.documentElement.classList.add(newTheme);
   };
 
   return (
