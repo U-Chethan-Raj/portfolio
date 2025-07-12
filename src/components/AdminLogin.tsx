@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { X } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 interface AdminLoginProps {
@@ -12,117 +14,156 @@ interface AdminLoginProps {
 }
 
 export const AdminLogin = ({ isOpen, onClose, onLogin }: AdminLoginProps) => {
-  const [email, setEmail] = useState("");
+  const [step, setStep] = useState<"email" | "otp">("email");
+  const [email] = useState("u.chethanraj.business@gmail.com");
   const [otp, setOtp] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  if (!isOpen) return null;
+  const handleSendOTP = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('send-otp', {
+        body: { email }
+      });
 
-  const handleSendOtp = async () => {
-    if (email !== "u.chethanraj.business@gmail.com") {
+      if (error) throw error;
+
       toast({
-        title: "Access Denied",
-        description: "Invalid email address",
-        variant: "destructive"
+        title: "OTP Sent",
+        description: "Check your email for the verification code",
+      });
+      setStep("otp");
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send OTP",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOTP = async () => {
+    if (otp.length !== 6) {
+      toast({
+        title: "Invalid OTP",
+        description: "Please enter a 6-digit code",
+        variant: "destructive",
       });
       return;
     }
 
-    setIsLoading(true);
-    // Simulate OTP sending (would need Supabase for real implementation)
-    setTimeout(() => {
-      setOtpSent(true);
-      setIsLoading(false);
-      toast({
-        title: "OTP Sent",
-        description: "Please check your email for the verification code"
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('verify-otp', {
+        body: { email, otp }
       });
-    }, 2000);
-  };
 
-  const handleVerifyOtp = () => {
-    if (otp === "123456") { // Demo OTP for now
+      if (error) throw error;
+
+      localStorage.setItem('admin_session', data.sessionToken);
       toast({
         title: "Login Successful",
-        description: "Welcome to the admin panel"
+        description: "Welcome to the admin panel",
       });
+      
       onLogin();
       onClose();
-    } else {
+      // Redirect to admin dashboard
+      window.location.href = '/admin';
+    } catch (error: any) {
       toast({
         title: "Invalid OTP",
-        description: "Please check your verification code",
-        variant: "destructive"
+        description: error.message || "Please check your code and try again",
+        variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-background/95 backdrop-blur-md border border-border">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Admin Access</CardTitle>
-            <Button variant="ghost" size="icon" onClick={onClose}>
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <label className="text-sm font-medium">Email Address</label>
-            <Input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              disabled={otpSent}
-            />
-          </div>
+  const handleClose = () => {
+    setStep("email");
+    setOtp("");
+    onClose();
+  };
 
-          {!otpSent ? (
+  return (
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Admin Access</DialogTitle>
+        </DialogHeader>
+        
+        {step === "email" && (
+          <div className="space-y-4">
+            <div>
+              <Label>Email Address</Label>
+              <Input
+                type="email"
+                value="Admin User"
+                disabled
+                className="bg-muted"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                OTP will be sent to your registered email
+              </p>
+            </div>
             <Button 
-              onClick={handleSendOtp} 
+              onClick={handleSendOTP} 
+              disabled={loading}
               className="w-full"
-              disabled={!email || isLoading}
             >
-              {isLoading ? "Sending..." : "Send OTP"}
+              {loading ? "Sending..." : "Send OTP"}
             </Button>
-          ) : (
-            <>
-              <div>
-                <label className="text-sm font-medium">Verification Code</label>
-                <Input
-                  type="text"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  placeholder="Enter 6-digit OTP"
+          </div>
+        )}
+
+        {step === "otp" && (
+          <div className="space-y-4">
+            <div>
+              <Label>Enter OTP</Label>
+              <div className="flex justify-center mt-2">
+                <InputOTP
                   maxLength={6}
-                />
+                  value={otp}
+                  onChange={(value) => setOtp(value)}
+                >
+                  <InputOTPGroup>
+                    <InputOTPSlot index={0} />
+                    <InputOTPSlot index={1} />
+                    <InputOTPSlot index={2} />
+                    <InputOTPSlot index={3} />
+                    <InputOTPSlot index={4} />
+                    <InputOTPSlot index={5} />
+                  </InputOTPGroup>
+                </InputOTP>
               </div>
-              <Button onClick={handleVerifyOtp} className="w-full">
-                Verify & Login
-              </Button>
+              <p className="text-xs text-muted-foreground mt-2 text-center">
+                Check your email for the 6-digit code
+              </p>
+            </div>
+            <div className="flex gap-2">
               <Button 
                 variant="outline" 
-                onClick={() => {
-                  setOtpSent(false);
-                  setOtp("");
-                }} 
-                className="w-full"
+                onClick={() => setStep("email")}
+                className="flex-1"
               >
-                Resend OTP
+                Back
               </Button>
-            </>
-          )}
-
-          <p className="text-xs text-muted-foreground text-center">
-            Note: OTP functionality requires Supabase integration for email services
-          </p>
-        </CardContent>
-      </Card>
-    </div>
+              <Button 
+                onClick={handleVerifyOTP} 
+                disabled={loading || otp.length !== 6}
+                className="flex-1"
+              >
+                {loading ? "Verifying..." : "Verify"}
+              </Button>
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 };

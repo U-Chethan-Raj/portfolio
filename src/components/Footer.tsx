@@ -49,18 +49,39 @@ const Footer = ({ onAdminClick }: { onAdminClick?: () => void }) => {
           </div>
         </div>
 
-        <div className="border-t border-border mt-8 pt-8 flex justify-between items-center">
-          <button 
-            onClick={onAdminClick}
-            className="text-sm text-muted-foreground hover:text-primary transition-smooth cursor-pointer"
-          >
-            © {currentYear} Chethan Raj. All rights reserved. Built with ❤️ and React
-          </button>
+        <div className="border-t border-border mt-8 pt-8">
+          {/* Blog Categories */}
+          <div className="flex flex-wrap gap-6 text-sm mb-6 justify-center">
+            <a href="/blog/category/experience" className="text-muted-foreground hover:text-primary transition-colors">
+              Experience
+            </a>
+            <a href="/blog/category/projects" className="text-muted-foreground hover:text-primary transition-colors">
+              Projects
+            </a>
+            <a href="/blog/category/certifications" className="text-muted-foreground hover:text-primary transition-colors">
+              Certifications
+            </a>
+            <a href="/blog/category/participations" className="text-muted-foreground hover:text-primary transition-colors">
+              Participations
+            </a>
+          </div>
           
-          <div className="text-sm text-muted-foreground">
-            <a href="#" className="hover:text-primary transition-smooth">Blog</a>
-            <span className="mx-2">•</span>
-            <a href="#" className="hover:text-primary transition-smooth">Privacy</a>
+          <div className="flex justify-between items-center">
+            <button 
+              onClick={onAdminClick}
+              className="text-xs text-muted-foreground/30 hover:text-foreground transition-colors opacity-20 hover:opacity-100"
+            >
+              ©
+            </button>
+            <p className="text-sm text-muted-foreground">
+              © {currentYear} Chethan Raj. All rights reserved. Built with ❤️ and React
+            </p>
+            
+            <div className="text-sm text-muted-foreground">
+              <a href="#" className="hover:text-primary transition-smooth">Blog</a>
+              <span className="mx-2">•</span>
+              <a href="#" className="hover:text-primary transition-smooth">Privacy</a>
+            </div>
           </div>
         </div>
       </div>

@@ -14,7 +14,110 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      admin_sessions: {
+        Row: {
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          otp_code: string
+          verified: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          expires_at: string
+          id?: string
+          otp_code: string
+          verified?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          otp_code?: string
+          verified?: boolean | null
+        }
+        Relationships: []
+      }
+      blogs: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          excerpt: string | null
+          id: string
+          image_url: string | null
+          published: boolean | null
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          content: string
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          image_url?: string | null
+          published?: boolean | null
+          slug: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          image_url?: string | null
+          published?: boolean | null
+          slug?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      uploads: {
+        Row: {
+          blog_id: string | null
+          created_at: string
+          file_path: string
+          file_size: number | null
+          file_type: string
+          filename: string
+          id: string
+        }
+        Insert: {
+          blog_id?: string | null
+          created_at?: string
+          file_path: string
+          file_size?: number | null
+          file_type: string
+          filename: string
+          id?: string
+        }
+        Update: {
+          blog_id?: string | null
+          created_at?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string
+          filename?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "uploads_blog_id_fkey"
+            columns: ["blog_id"]
+            isOneToOne: false
+            referencedRelation: "blogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
