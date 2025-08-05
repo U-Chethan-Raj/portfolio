@@ -2,13 +2,16 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PlusCircle, FileText, Image, Award, Briefcase } from "lucide-react";
+import { PlusCircle, FileText, Image, Award, Briefcase, Edit, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import BlogForm from "@/components/BlogForm";
 
 const Admin = () => {
   const [blogs, setBlogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showBlogForm, setShowBlogForm] = useState(false);
+  const [editingBlog, setEditingBlog] = useState<any>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -45,6 +48,47 @@ const Admin = () => {
   const handleLogout = () => {
     localStorage.removeItem('admin_session');
     window.location.href = '/';
+  };
+
+  const handleNewBlog = (category?: string) => {
+    setEditingBlog(category ? { category } : null);
+    setShowBlogForm(true);
+  };
+
+  const handleEditBlog = (blog: any) => {
+    setEditingBlog(blog);
+    setShowBlogForm(true);
+  };
+
+  const handleDeleteBlog = async (blogId: string) => {
+    if (!confirm('Are you sure you want to delete this blog?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('blogs')
+        .delete()
+        .eq('id', blogId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Blog deleted successfully",
+      });
+
+      fetchBlogs();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to delete blog",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCloseBlogForm = () => {
+    setShowBlogForm(false);
+    setEditingBlog(null);
   };
 
   const categories = [
@@ -113,8 +157,21 @@ const Admin = () => {
                         </p>
                       </div>
                       <div className="flex gap-2">
-                        <Button size="sm" variant="outline">Edit</Button>
-                        <Button size="sm" variant="outline">View</Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleEditBlog(blog)}
+                        >
+                          <Edit className="h-3 w-3 mr-1" />
+                          Edit
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => window.open(`/blog/${blog.slug}`, '_blank')}
+                        >
+                          View
+                        </Button>
                       </div>
                     </div>
                   ))}
@@ -127,7 +184,7 @@ const Admin = () => {
             <TabsContent key={category.id} value={category.id}>
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold">{category.label}</h2>
-                <Button>
+                <Button onClick={() => handleNewBlog(category.id)}>
                   <PlusCircle className="h-4 w-4 mr-2" />
                   New {category.label.slice(0, -1)}
                 </Button>
@@ -142,8 +199,22 @@ const Admin = () => {
                         <div className="flex justify-between items-start">
                           <CardTitle>{blog.title}</CardTitle>
                           <div className="flex gap-2">
-                            <Button size="sm" variant="outline">Edit</Button>
-                            <Button size="sm" variant="outline">Delete</Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleEditBlog(blog)}
+                            >
+                              <Edit className="h-3 w-3 mr-1" />
+                              Edit
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleDeleteBlog(blog.id)}
+                            >
+                              <Trash2 className="h-3 w-3 mr-1" />
+                              Delete
+                            </Button>
                           </div>
                         </div>
                       </CardHeader>
@@ -160,6 +231,14 @@ const Admin = () => {
             </TabsContent>
           ))}
         </Tabs>
+
+        {showBlogForm && (
+          <BlogForm
+            blog={editingBlog}
+            onSave={fetchBlogs}
+            onClose={handleCloseBlogForm}
+          />
+        )}
       </div>
     </div>
   );

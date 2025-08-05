@@ -1,126 +1,60 @@
 
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Calendar, User, ArrowRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
-const blogPosts = [
-  {
-    id: "web-development-experience",
-    title: "5+ Years of Web Development Excellence",
-    excerpt: "With over five years of dedicated experience in web development, I've had the privilege of working on diverse projects...",
-    date: "2025-01-11",
-    author: "Chethan Raj U",
-    category: "Experience",
-    image: "/src/assets/experience.jpg",
-    featured: true
-  },
-  {
-    id: "react-expertise",
-    title: "Mastering React and Modern JavaScript Frameworks",
-    excerpt: "React has revolutionized how I approach frontend development. My expertise in React, combined with modern JavaScript...",
-    date: "2025-01-10",
-    author: "Chethan Raj U",
-    category: "Skills",
-    image: "/src/assets/skills-cv.jpg",
-    featured: true
-  },
-  {
-    id: "nodejs-backend",
-    title: "Building Scalable Backend Systems with Node.js",
-    excerpt: "Node.js has been instrumental in my full-stack development journey. My expertise in building robust backend systems...",
-    date: "2025-01-09",
-    author: "Chethan Raj U",
-    category: "Skills",
-    image: "/src/assets/project1.jpg",
-    featured: false
-  },
-  {
-    id: "ux-design-expertise",
-    title: "Creating Intuitive User Experiences",
-    excerpt: "My strong background in user experience design has been crucial in creating interfaces that not only look great...",
-    date: "2025-01-08",
-    author: "Chethan Raj U",
-    category: "Skills",
-    image: "/src/assets/project2.jpg",
-    featured: false
-  },
-  {
-    id: "scalable-applications",
-    title: "Delivering Scalable Web Applications",
-    excerpt: "Throughout my career, I've consistently delivered scalable web applications that grow with business needs...",
-    date: "2025-01-07",
-    author: "Chethan Raj U",
-    category: "Experience",
-    image: "/src/assets/project3.jpg",
-    featured: false
-  },
-  {
-    id: "techcorp-senior-developer",
-    title: "Leading Frontend Development at TechCorp",
-    excerpt: "As a Senior Developer at TechCorp since 2022, I've had the opportunity to lead a talented frontend development team...",
-    date: "2025-01-06",
-    author: "Chethan Raj U",
-    category: "Experience",
-    image: "/src/assets/experience.jpg",
-    featured: false
-  },
-  {
-    id: "startupxyz-fullstack",
-    title: "Full Stack Innovation at StartupXYZ",
-    excerpt: "During my time at StartupXYZ (2020-2022), I wore multiple hats as a Full Stack Developer, contributing to both frontend...",
-    date: "2025-01-05",
-    author: "Chethan Raj U",
-    category: "Experience",
-    image: "/src/assets/project1.jpg",
-    featured: false
-  },
-  {
-    id: "computer-science-degree",
-    title: "Academic Excellence in Computer Science",
-    excerpt: "My Bachelor of Science in Computer Science from the University of Technology has provided me with a solid theoretical foundation...",
-    date: "2025-01-04",
-    author: "Chethan Raj U",
-    category: "Education",
-    image: "/src/assets/education-cv.jpg",
-    featured: false
-  },
-  {
-    id: "aws-cloud-skills",
-    title: "Mastering Cloud Technologies with AWS",
-    excerpt: "My expertise in AWS and cloud technologies has been crucial in building and deploying scalable applications...",
-    date: "2025-01-03",
-    author: "Chethan Raj U",
-    category: "Skills",
-    image: "/src/assets/project3.jpg",
-    featured: false
-  },
-  {
-    id: "docker-kubernetes",
-    title: "Containerization and Orchestration Excellence",
-    excerpt: "Docker and Kubernetes have transformed how I package, deploy, and manage applications. My expertise in containerization...",
-    date: "2025-01-02",
-    author: "Chethan Raj U",
-    category: "Skills",
-    image: "/src/assets/skills-cv.jpg",
-    featured: false
-  }
-];
-
-const categories = [
-  { name: "All", count: blogPosts.length },
-  { name: "Experience", count: blogPosts.filter(p => p.category === "Experience").length },
-  { name: "Skills", count: blogPosts.filter(p => p.category === "Skills").length },
-  { name: "Education", count: blogPosts.filter(p => p.category === "Education").length },
-  { name: "Projects", count: 0 },
-  { name: "Certifications", count: 0 },
-  { name: "Participations", count: 0 }
-];
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Blogs() {
-  const featuredPosts = blogPosts.filter(post => post.featured);
-  const recentPosts = blogPosts.filter(post => !post.featured).slice(0, 6);
+  const [blogs, setBlogs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchBlogs();
+  }, []);
+
+  const fetchBlogs = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('blogs')
+        .select('*')
+        .eq('published', true)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setBlogs(data || []);
+    } catch (error) {
+      console.error('Error fetching blogs:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const categories = [
+    { name: "All", count: blogs.length },
+    { name: "Experience", count: blogs.filter(b => b.category === "experience").length },
+    { name: "Skills", count: blogs.filter(b => b.category === "skills").length },
+    { name: "Education", count: blogs.filter(b => b.category === "education").length },
+    { name: "Projects", count: blogs.filter(b => b.category === "projects").length },
+    { name: "Certifications", count: blogs.filter(b => b.category === "certifications").length },
+    { name: "Participations", count: blogs.filter(b => b.category === "participations").length }
+  ];
+
+  const featuredBlogs = blogs.filter(blog => blog.category === "experience" || blog.category === "skills").slice(0, 4);
+  const recentBlogs = blogs.slice(0, 6);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading blogs...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -158,41 +92,41 @@ export default function Blogs() {
         <section className="mb-16">
           <h2 className="text-3xl font-bold mb-8 text-center">Featured Posts</h2>
           <div className="grid md:grid-cols-2 gap-8">
-            {featuredPosts.map((post) => (
-              <Card key={post.id} className="card-gradient overflow-hidden hover:shadow-glow transition-smooth">
+            {featuredBlogs.map((blog) => (
+              <Card key={blog.id} className="card-gradient overflow-hidden hover:shadow-glow transition-smooth">
                 <div className="relative h-64 overflow-hidden">
                   <img 
-                    src={post.image} 
-                    alt={post.title}
+                    src={blog.image_url || "/placeholder.svg"} 
+                    alt={blog.title}
                     className="w-full h-full object-cover transition-smooth group-hover:scale-105"
                   />
                   <div className="absolute top-4 left-4">
                     <Badge variant="secondary">
-                      {post.category}
+                      {blog.category}
                     </Badge>
                   </div>
                 </div>
                 <div className="p-6">
                   <h3 className="text-xl font-semibold mb-3 hover:text-primary transition-smooth">
-                    <Link to={`/blog/${post.id}`}>
-                      {post.title}
+                    <Link to={`/blog/${blog.slug}`}>
+                      {blog.title}
                     </Link>
                   </h3>
                   <p className="text-muted-foreground mb-4 line-clamp-3">
-                    {post.excerpt}
+                    {blog.excerpt}
                   </p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
                       <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
-                        <span>{new Date(post.date).toLocaleDateString()}</span>
+                        <span>{new Date(blog.created_at).toLocaleDateString()}</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <User className="h-4 w-4" />
-                        <span>{post.author}</span>
+                        <span>Chethan Raj U</span>
                       </div>
                     </div>
-                    <Link to={`/blog/${post.id}`}>
+                    <Link to={`/blog/${blog.slug}`}>
                       <Button variant="ghost" size="sm">
                         Read More <ArrowRight className="h-4 w-4 ml-1" />
                       </Button>
@@ -208,35 +142,35 @@ export default function Blogs() {
         <section className="mb-16">
           <h2 className="text-3xl font-bold mb-8 text-center">Recent Posts</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {recentPosts.map((post) => (
-              <Card key={post.id} className="card-gradient overflow-hidden hover:shadow-card transition-smooth group">
+            {recentBlogs.map((blog) => (
+              <Card key={blog.id} className="card-gradient overflow-hidden hover:shadow-card transition-smooth group">
                 <div className="relative h-48 overflow-hidden">
                   <img 
-                    src={post.image} 
-                    alt={post.title}
+                    src={blog.image_url || "/placeholder.svg"} 
+                    alt={blog.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-smooth"
                   />
                   <div className="absolute top-4 left-4">
                     <Badge variant="secondary" className="text-xs">
-                      {post.category}
+                      {blog.category}
                     </Badge>
                   </div>
                 </div>
                 <div className="p-6">
                   <h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-smooth">
-                    <Link to={`/blog/${post.id}`}>
-                      {post.title}
+                    <Link to={`/blog/${blog.slug}`}>
+                      {blog.title}
                     </Link>
                   </h3>
                   <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
-                    {post.excerpt}
+                    {blog.excerpt}
                   </p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <Calendar className="h-3 w-3" />
-                      <span>{new Date(post.date).toLocaleDateString()}</span>
+                      <span>{new Date(blog.created_at).toLocaleDateString()}</span>
                     </div>
-                    <Link to={`/blog/${post.id}`}>
+                    <Link to={`/blog/${blog.slug}`}>
                       <Button variant="ghost" size="sm" className="text-xs">
                         Read <ArrowRight className="h-3 w-3 ml-1" />
                       </Button>
