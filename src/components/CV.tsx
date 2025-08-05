@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,11 +21,31 @@ const CV = () => {
       content: {
         heading: "Full Stack Developer & UI/UX Designer",
         details: [
-          "5+ years of experience in web development",
-          "Expertise in React, Node.js, and modern JavaScript frameworks", 
-          "Strong background in user experience design and interface development",
-          "Proven track record of delivering scalable web applications",
-          "Passionate about creating efficient, user-centered digital solutions"
+          { 
+            text: "5+ years of experience in web development", 
+            blogSlug: "web-development-experience",
+            hasMore: true 
+          },
+          { 
+            text: "Expertise in React, Node.js, and modern JavaScript frameworks", 
+            blogSlug: "react-expertise",
+            hasMore: true 
+          },
+          { 
+            text: "Strong background in user experience design and interface development", 
+            blogSlug: "ux-design-expertise",
+            hasMore: true 
+          },
+          { 
+            text: "Proven track record of delivering scalable web applications", 
+            blogSlug: "scalable-applications",
+            hasMore: true 
+          },
+          { 
+            text: "Passionate about creating efficient, user-centered digital solutions", 
+            blogSlug: null,
+            hasMore: false 
+          }
         ]
       }
     },
@@ -35,11 +56,31 @@ const CV = () => {
       content: {
         heading: "Professional Journey",
         details: [
-          "Senior Developer at TechCorp (2022-Present) - Leading frontend development team",
-          "Full Stack Developer at StartupXYZ (2020-2022) - Built and maintained web applications",
-          "UI/UX Designer at DesignStudio (2019-2020) - Created user interfaces and experiences",
-          "Junior Developer at CodeAgency (2018-2019) - Developed responsive websites",
-          "Freelance Web Developer (2017-2018) - Worked with various clients on custom projects"
+          { 
+            text: "Senior Developer at TechCorp (2022-Present) - Leading frontend development team", 
+            blogSlug: "techcorp-senior-developer",
+            hasMore: true 
+          },
+          { 
+            text: "Full Stack Developer at StartupXYZ (2020-2022) - Built and maintained web applications", 
+            blogSlug: "startupxyz-fullstack",
+            hasMore: true 
+          },
+          { 
+            text: "UI/UX Designer at DesignStudio (2019-2020) - Created user interfaces and experiences", 
+            blogSlug: null,
+            hasMore: false 
+          },
+          { 
+            text: "Junior Developer at CodeAgency (2018-2019) - Developed responsive websites", 
+            blogSlug: null,
+            hasMore: false 
+          },
+          { 
+            text: "Freelance Web Developer (2017-2018) - Worked with various clients on custom projects", 
+            blogSlug: null,
+            hasMore: false 
+          }
         ]
       }
     },
@@ -50,11 +91,31 @@ const CV = () => {
       content: {
         heading: "Academic Excellence",
         details: [
-          "Bachelor of Science in Computer Science - University of Technology (2021-2025)",
-          "GPA: 3.8/4.0 - Dean's List Recognition",
-          "Relevant Coursework: Data Structures, Algorithms, Web Development, Database Systems",
-          "Capstone Project: E-commerce Platform with Real-time Analytics",
-          "Active member of Computer Science Society and Programming Club"
+          { 
+            text: "Bachelor of Science in Computer Science - University of Technology (2021-2025)", 
+            blogSlug: "computer-science-degree",
+            hasMore: true 
+          },
+          { 
+            text: "GPA: 3.8/4.0 - Dean's List Recognition", 
+            blogSlug: null,
+            hasMore: false 
+          },
+          { 
+            text: "Relevant Coursework: Data Structures, Algorithms, Web Development, Database Systems", 
+            blogSlug: null,
+            hasMore: false 
+          },
+          { 
+            text: "Capstone Project: E-commerce Platform with Real-time Analytics", 
+            blogSlug: null,
+            hasMore: false 
+          },
+          { 
+            text: "Active member of Computer Science Society and Programming Club", 
+            blogSlug: null,
+            hasMore: false 
+          }
         ]
       }
     },
@@ -65,11 +126,31 @@ const CV = () => {
       content: {
         heading: "Technical Expertise",
         details: [
-          "Frontend: React, Vue.js, Angular, TypeScript, HTML5, CSS3, Tailwind CSS",
-          "Backend: Node.js, Express, Python, Django, Java Spring Boot",
-          "Databases: MongoDB, PostgreSQL, MySQL, Redis",
-          "Cloud & DevOps: AWS, Docker, Kubernetes, CI/CD, Git",
-          "Design: Figma, Adobe Creative Suite, Sketch, Prototyping"
+          { 
+            text: "Frontend: React, Vue.js, Angular, TypeScript, HTML5, CSS3, Tailwind CSS", 
+            blogSlug: "react-expertise",
+            hasMore: true 
+          },
+          { 
+            text: "Backend: Node.js, Express, Python, Django, Java Spring Boot", 
+            blogSlug: "nodejs-backend",
+            hasMore: true 
+          },
+          { 
+            text: "Databases: MongoDB, PostgreSQL, MySQL, Redis", 
+            blogSlug: null,
+            hasMore: false 
+          },
+          { 
+            text: "Cloud & DevOps: AWS, Docker, Kubernetes, CI/CD, Git", 
+            blogSlug: "aws-cloud-skills",
+            hasMore: true 
+          },
+          { 
+            text: "Design: Figma, Adobe Creative Suite, Sketch, Prototyping", 
+            blogSlug: "ux-design-expertise",
+            hasMore: true 
+          }
         ]
       }
     }
@@ -106,6 +187,12 @@ const CV = () => {
       closeImageZoom();
     }
   });
+
+  const handleDetailClick = (detail) => {
+    if (detail.blogSlug) {
+      window.location.href = `/blog/${detail.blogSlug}`;
+    }
+  };
 
   return (
     <section id="cv" className="py-20 px-6">
@@ -190,19 +277,18 @@ const CV = () => {
               {cvSections[currentSlide].content.details.map((detail, index) => (
                 <div 
                   key={index} 
-                  className="flex items-start gap-3 p-3 rounded-lg bg-card/30 backdrop-blur-sm border border-border/30 hover:bg-card/50 transition-smooth cursor-pointer group"
+                  className={`flex items-start gap-3 p-3 rounded-lg bg-card/30 backdrop-blur-sm border border-border/30 hover:bg-card/50 transition-smooth group ${
+                    detail.hasMore ? 'cursor-pointer' : ''
+                  }`}
                   style={{ animationDelay: `${index * 0.1}s` }}
-                  onClick={() => {
-                    const blogSlug = cvSections[currentSlide].title === "Professional Summary" && index === 0 ? "web-development-experience" :
-                                   cvSections[currentSlide].title === "Technical Skills" && index === 0 ? "react-expertise" : null;
-                    if (blogSlug) window.location.href = `/blog/${blogSlug}`;
-                  }}
+                  onClick={() => handleDetailClick(detail)}
                 >
                   <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
                   <div className="flex-1">
-                    <p className="text-muted-foreground leading-relaxed group-hover:text-foreground transition-smooth">{detail}</p>
-                    {((cvSections[currentSlide].title === "Professional Summary" && index === 0) || 
-                      (cvSections[currentSlide].title === "Technical Skills" && index === 0)) && (
+                    <p className="text-muted-foreground leading-relaxed group-hover:text-foreground transition-smooth">
+                      {detail.text}
+                    </p>
+                    {detail.hasMore && (
                       <span className="text-xs text-primary opacity-0 group-hover:opacity-100 transition-smooth mt-1 block">
                         Click to know more →
                       </span>

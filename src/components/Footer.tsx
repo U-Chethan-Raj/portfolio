@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Github, Linkedin, Mail, ArrowUp } from "lucide-react";
 
@@ -55,6 +56,12 @@ const Footer = ({ onAdminClick }: { onAdminClick?: () => void }) => {
             <a href="/blog/category/experience" className="text-muted-foreground hover:text-primary transition-colors">
               Experience
             </a>
+            <a href="/blog/category/skills" className="text-muted-foreground hover:text-primary transition-colors">
+              Skills
+            </a>
+            <a href="/blog/category/education" className="text-muted-foreground hover:text-primary transition-colors">
+              Education
+            </a>
             <a href="/blog/category/projects" className="text-muted-foreground hover:text-primary transition-colors">
               Projects
             </a>
@@ -78,7 +85,7 @@ const Footer = ({ onAdminClick }: { onAdminClick?: () => void }) => {
             </p>
             
             <div className="text-sm text-muted-foreground">
-              <a href="#" className="hover:text-primary transition-smooth">Blog</a>
+              <a href="/blogs" className="hover:text-primary transition-smooth">Blog</a>
               <span className="mx-2">•</span>
               <a href="#" className="hover:text-primary transition-smooth">Privacy</a>
             </div>
