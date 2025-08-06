@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instanciate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "12.2.12 (cd3cf9e)"
   }
   public: {
     Tables: {
@@ -43,6 +43,7 @@ export type Database = {
       }
       blogs: {
         Row: {
+          attachments: Json | null
           category: string
           content: string
           created_at: string
@@ -55,6 +56,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          attachments?: Json | null
           category: string
           content: string
           created_at?: string
@@ -67,6 +69,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          attachments?: Json | null
           category?: string
           content?: string
           created_at?: string
@@ -76,6 +79,48 @@ export type Database = {
           published?: boolean | null
           slug?: string
           title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sections: {
+        Row: {
+          content: string | null
+          created_at: string
+          data: Json | null
+          id: string
+          image_url: string | null
+          order_index: number | null
+          published: boolean | null
+          section_type: string
+          subtitle: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          data?: Json | null
+          id?: string
+          image_url?: string | null
+          order_index?: number | null
+          published?: boolean | null
+          section_type: string
+          subtitle?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          data?: Json | null
+          id?: string
+          image_url?: string | null
+          order_index?: number | null
+          published?: boolean | null
+          section_type?: string
+          subtitle?: string | null
+          title?: string | null
           updated_at?: string
         }
         Relationships: []

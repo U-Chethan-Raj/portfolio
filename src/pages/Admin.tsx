@@ -2,16 +2,20 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PlusCircle, FileText, Image, Award, Briefcase, Edit, Trash2 } from "lucide-react";
+import { PlusCircle, FileText, Image, Award, Briefcase, Edit, Trash2, Settings, Layout } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import BlogForm from "@/components/BlogForm";
+import SectionForm from "@/components/SectionForm";
 
 const Admin = () => {
   const [blogs, setBlogs] = useState<any[]>([]);
+  const [sections, setSections] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showBlogForm, setShowBlogForm] = useState(false);
+  const [showSectionForm, setShowSectionForm] = useState(false);
   const [editingBlog, setEditingBlog] = useState<any>(null);
+  const [editingSection, setEditingSection] = useState<any>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -23,6 +27,7 @@ const Admin = () => {
     }
 
     fetchBlogs();
+    fetchSections();
   }, []);
 
   const fetchBlogs = async () => {
@@ -42,6 +47,24 @@ const Admin = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchSections = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('sections')
+        .select('*')
+        .order('order_index', { ascending: true });
+
+      if (error) throw error;
+      setSections(data || []);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch sections",
+        variant: "destructive",
+      });
     }
   };
 
@@ -91,11 +114,54 @@ const Admin = () => {
     setEditingBlog(null);
   };
 
+  const handleNewSection = () => {
+    setEditingSection(null);
+    setShowSectionForm(true);
+  };
+
+  const handleEditSection = (section: any) => {
+    setEditingSection(section);
+    setShowSectionForm(true);
+  };
+
+  const handleDeleteSection = async (sectionId: string) => {
+    if (!confirm('Are you sure you want to delete this section?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('sections')
+        .delete()
+        .eq('id', sectionId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Section deleted successfully",
+      });
+
+      fetchSections();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to delete section",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCloseSectionForm = () => {
+    setShowSectionForm(false);
+    setEditingSection(null);
+  };
+
   const categories = [
     { id: 'experience', label: 'Experience', icon: Briefcase },
     { id: 'projects', label: 'Projects', icon: FileText },
     { id: 'certifications', label: 'Certifications', icon: Award },
     { id: 'participations', label: 'Participations', icon: Image },
+    { id: 'skills', label: 'Skills', icon: Settings },
+    { id: 'education', label: 'Education', icon: Award },
   ];
 
   return (
@@ -109,16 +175,54 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="sections">Sections</TabsTrigger>
             <TabsTrigger value="experience">Experience</TabsTrigger>
             <TabsTrigger value="projects">Projects</TabsTrigger>
             <TabsTrigger value="certifications">Certifications</TabsTrigger>
             <TabsTrigger value="participations">Participations</TabsTrigger>
+            <TabsTrigger value="skills">Skills</TabsTrigger>
+            <TabsTrigger value="education">Education</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Blogs</CardTitle>
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{blogs.length}</div>
+                  <p className="text-xs text-muted-foreground">All content entries</p>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Sections</CardTitle>
+                  <Layout className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{sections.length}</div>
+                  <p className="text-xs text-muted-foreground">Homepage sections</p>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Published</CardTitle>
+                  <Image className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{blogs.filter(b => b.published).length}</div>
+                  <p className="text-xs text-muted-foreground">Live content</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
               {categories.map((category) => {
                 const categoryBlogs = blogs.filter(b => b.category === category.id);
                 const Icon = category.icon;
@@ -134,7 +238,7 @@ const Admin = () => {
                     <CardContent>
                       <div className="text-2xl font-bold">{categoryBlogs.length}</div>
                       <p className="text-xs text-muted-foreground">
-                        Published blogs
+                        Published entries
                       </p>
                     </CardContent>
                   </Card>
@@ -178,6 +282,66 @@ const Admin = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="sections">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold">Homepage Sections</h2>
+              <Button onClick={handleNewSection}>
+                <PlusCircle className="h-4 w-4 mr-2" />
+                New Section
+              </Button>
+            </div>
+
+            <div className="grid gap-6">
+              {sections.map((section) => (
+                <Card key={section.id}>
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          {section.title}
+                          <span className="text-sm bg-muted px-2 py-1 rounded">
+                            {section.section_type}
+                          </span>
+                        </CardTitle>
+                        {section.subtitle && (
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {section.subtitle}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleEditSection(section)}
+                        >
+                          <Edit className="h-3 w-3 mr-1" />
+                          Edit
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleDeleteSection(section.id)}
+                        >
+                          <Trash2 className="h-3 w-3 mr-1" />
+                          Delete
+                        </Button>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground mb-4">{section.content}</p>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <span>Status: {section.published ? 'Published' : 'Draft'}</span>
+                      <span>Order: {section.order_index}</span>
+                      <span>Created: {new Date(section.created_at).toLocaleDateString()}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </TabsContent>
 
           {categories.map((category) => (
@@ -237,6 +401,14 @@ const Admin = () => {
             blog={editingBlog}
             onSave={fetchBlogs}
             onClose={handleCloseBlogForm}
+          />
+        )}
+
+        {showSectionForm && (
+          <SectionForm
+            section={editingSection}
+            onSave={fetchSections}
+            onClose={handleCloseSectionForm}
           />
         )}
       </div>

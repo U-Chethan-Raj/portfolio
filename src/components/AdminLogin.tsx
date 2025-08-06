@@ -97,29 +97,29 @@ export const AdminLogin = ({ isOpen, onClose, onLogin }: AdminLoginProps) => {
           <DialogTitle>Admin Access</DialogTitle>
         </DialogHeader>
         
-        {step === "email" && (
-          <div className="space-y-4">
+        <div className="space-y-4">
+          <div className="text-center space-y-4">
+            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+              <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+              </svg>
+            </div>
             <div>
-              <Label>Email Address</Label>
-              <Input
-                type="email"
-                value="Admin User"
-                disabled
-                className="bg-muted"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                OTP will be sent to your registered email
+              <h3 className="text-lg font-semibold">Admin Access</h3>
+              <p className="text-sm text-muted-foreground">
+                An OTP will be sent to your registered email address
               </p>
             </div>
-            <Button 
-              onClick={handleSendOTP} 
-              disabled={loading}
-              className="w-full"
-            >
-              {loading ? "Sending..." : "Send OTP"}
-            </Button>
           </div>
-        )}
+          <Button 
+            onClick={handleSendOTP} 
+            disabled={loading}
+            className="w-full"
+            size="lg"
+          >
+            {loading ? "Sending OTP..." : "Send OTP"}
+          </Button>
+        </div>
 
         {step === "otp" && (
           <div className="space-y-4">
