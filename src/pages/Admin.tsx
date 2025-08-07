@@ -177,6 +177,12 @@ const Admin = () => {
     { id: 'contact', label: 'Contact Section', icon: Settings },
   ];
 
+  // Add missing tabs to the categories array for proper handling
+  const allTabs = [
+    ...categories,
+    { id: 'cv_download', label: 'CV Download', icon: FileText }
+  ];
+
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-6xl mx-auto">
@@ -188,18 +194,28 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-10">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="sections">Sections</TabsTrigger>
-            <TabsTrigger value="experience">Experience</TabsTrigger>
-            <TabsTrigger value="projects">Projects</TabsTrigger>
-            <TabsTrigger value="certifications">Certifications</TabsTrigger>
-            <TabsTrigger value="participations">Participations</TabsTrigger>
-            <TabsTrigger value="skills">Skills</TabsTrigger>
-            <TabsTrigger value="education">Education</TabsTrigger>
-            <TabsTrigger value="services">What I Do</TabsTrigger>
-            <TabsTrigger value="professional_summary">Summary</TabsTrigger>
-          </TabsList>
+          <div className="space-y-4">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="sections">Sections</TabsTrigger>
+            </TabsList>
+            
+            <div className="grid w-full grid-cols-3 lg:grid-cols-6 gap-2">
+              <TabsTrigger value="experience" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Experience</TabsTrigger>
+              <TabsTrigger value="projects" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Projects</TabsTrigger>
+              <TabsTrigger value="certifications" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Certifications</TabsTrigger>
+              <TabsTrigger value="participations" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Participations</TabsTrigger>
+              <TabsTrigger value="skills" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Skills</TabsTrigger>
+              <TabsTrigger value="education" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Education</TabsTrigger>
+            </div>
+            
+            <div className="grid w-full grid-cols-2 lg:grid-cols-4 gap-2">
+              <TabsTrigger value="services" className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground">What I Do</TabsTrigger>
+              <TabsTrigger value="professional_summary" className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground">Summary</TabsTrigger>
+              <TabsTrigger value="key_achievements" className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground">Achievements</TabsTrigger>
+              <TabsTrigger value="cv_download" className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground">CV Download</TabsTrigger>
+            </div>
+          </div>
 
           <TabsContent value="overview">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -359,7 +375,7 @@ const Admin = () => {
             </div>
           </TabsContent>
 
-          {categories.map((category) => (
+          {allTabs.map((category) => (
             <TabsContent key={category.id} value={category.id}>
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold">{category.label}</h2>
