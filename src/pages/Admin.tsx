@@ -162,6 +162,19 @@ const Admin = () => {
     { id: 'participations', label: 'Participations', icon: Image },
     { id: 'skills', label: 'Skills', icon: Settings },
     { id: 'education', label: 'Education', icon: Award },
+    { id: 'services', label: 'What I Do', icon: Settings },
+    { id: 'professional_summary', label: 'Professional Summary', icon: FileText },
+    { id: 'key_achievements', label: 'Key Achievements', icon: Award },
+  ];
+
+  const sectionTypes = [
+    { id: 'services', label: 'What I Do', icon: Settings },
+    { id: 'professional_summary', label: 'Professional Summary', icon: FileText },
+    { id: 'key_achievements', label: 'Key Achievements', icon: Award },
+    { id: 'cv_download', label: 'CV Download', icon: FileText },
+    { id: 'hero', label: 'Hero Section', icon: Image },
+    { id: 'about', label: 'About Section', icon: FileText },
+    { id: 'contact', label: 'Contact Section', icon: Settings },
   ];
 
   return (
@@ -175,7 +188,7 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8">
+          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-10">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="sections">Sections</TabsTrigger>
             <TabsTrigger value="experience">Experience</TabsTrigger>
@@ -184,6 +197,8 @@ const Admin = () => {
             <TabsTrigger value="participations">Participations</TabsTrigger>
             <TabsTrigger value="skills">Skills</TabsTrigger>
             <TabsTrigger value="education">Education</TabsTrigger>
+            <TabsTrigger value="services">What I Do</TabsTrigger>
+            <TabsTrigger value="professional_summary">Summary</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
@@ -350,7 +365,7 @@ const Admin = () => {
                 <h2 className="text-2xl font-bold">{category.label}</h2>
                 <Button onClick={() => handleNewBlog(category.id)}>
                   <PlusCircle className="h-4 w-4 mr-2" />
-                  New {category.label.slice(0, -1)}
+                  New {category.label.endsWith('s') ? category.label.slice(0, -1) : category.label}
                 </Button>
               </div>
 
@@ -384,13 +399,26 @@ const Admin = () => {
                       </CardHeader>
                       <CardContent>
                         <p className="text-muted-foreground mb-4">{blog.excerpt}</p>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
                           <span>Status: {blog.published ? 'Published' : 'Draft'}</span>
                           <span>Created: {new Date(blog.created_at).toLocaleDateString()}</span>
                         </div>
+                        {blog.attachments && blog.attachments.length > 0 && (
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <span>Attachments: {blog.attachments.length}</span>
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                   ))}
+                {blogs.filter(blog => blog.category === category.id).length === 0 && (
+                  <Card>
+                    <CardContent className="text-center py-8">
+                      <p className="text-muted-foreground">No {category.label.toLowerCase()} entries yet.</p>
+                      <p className="text-sm text-muted-foreground mt-2">Click "New {category.label.endsWith('s') ? category.label.slice(0, -1) : category.label}" to add your first entry.</p>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
             </TabsContent>
           ))}

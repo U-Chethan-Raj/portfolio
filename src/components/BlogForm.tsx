@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { X, Upload, Trash2, Eye } from "lucide-react";
+import { X, Upload, Trash2, Eye, Download, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -37,6 +37,9 @@ const BlogForm = ({ blog, onSave, onClose }: BlogFormProps) => {
     { value: "participations", label: "Participations" },
     { value: "skills", label: "Skills" },
     { value: "education", label: "Education" },
+    { value: "services", label: "What I Do" },
+    { value: "professional_summary", label: "Professional Summary" },
+    { value: "key_achievements", label: "Key Achievements" },
   ];
 
   useEffect(() => {

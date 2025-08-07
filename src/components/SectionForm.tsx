@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { X } from "lucide-react";
+import { X, Upload, FileText, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -23,21 +23,27 @@ const SectionForm = ({ section, onSave, onClose }: SectionFormProps) => {
     subtitle: "",
     content: "",
     image_url: "",
+    cv_file_url: "",
     data: "{}",
     order_index: 0,
     published: true,
   });
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [cvFile, setCvFile] = useState<File | null>(null);
   const { toast } = useToast();
 
   const sectionTypes = [
     { value: "hero", label: "Hero Section" },
     { value: "about", label: "About Section" },
+    { value: "services", label: "What I Do" },
+    { value: "professional_summary", label: "Professional Summary" },
+    { value: "key_achievements", label: "Key Achievements" },
+    { value: "cv_download", label: "CV Download" },
     { value: "projects", label: "Projects Section" },
     { value: "cv", label: "CV Section" },
     { value: "contact", label: "Contact Section" },
     { value: "testimonials", label: "Testimonials" },
-    { value: "services", label: "Services" },
     { value: "custom", label: "Custom Section" },
   ];
 
@@ -49,12 +55,50 @@ const SectionForm = ({ section, onSave, onClose }: SectionFormProps) => {
         subtitle: section.subtitle || "",
         content: section.content || "",
         image_url: section.image_url || "",
+        cv_file_url: section.cv_file_url || "",
         data: JSON.stringify(section.data || {}, null, 2),
         order_index: section.order_index || 0,
         published: section.published ?? true,
       });
     }
   }, [section]);
+
+  const handleCvUpload = async () => {
+    if (!cvFile) return;
+
+    setUploading(true);
+    try {
+      const fileExt = cvFile.name.split('.').pop();
+      const fileName = `cv-${Date.now()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('cv-files')
+        .upload(filePath, cvFile);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('cv-files')
+        .getPublicUrl(filePath);
+
+      setFormData({ ...formData, cv_file_url: publicUrl });
+      setCvFile(null);
+
+      toast({
+        title: "Success",
+        description: "CV file uploaded successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: `Failed to upload CV: ${error.message}`,
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -182,6 +226,54 @@ const SectionForm = ({ section, onSave, onClose }: SectionFormProps) => {
                 placeholder="https://example.com/image.jpg"
               />
             </div>
+
+            {formData.section_type === 'cv_download' && (
+              <div className="space-y-4 p-4 border rounded-lg bg-muted/50">
+                <h4 className="font-medium">CV File Management</h4>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="cv_file">Upload CV File</Label>
+                  <Input
+                    id="cv_file"
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    onChange={(e) => setCvFile(e.target.files?.[0] || null)}
+                    className="cursor-pointer"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Accepted formats: PDF, DOC, DOCX
+                  </p>
+                </div>
+
+                {formData.cv_file_url && (
+                  <div className="flex items-center gap-2 p-2 bg-background rounded border">
+                    <FileText className="h-4 w-4" />
+                    <span className="text-sm flex-1">Current CV file uploaded</span>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => window.open(formData.cv_file_url, '_blank')}
+                    >
+                      <Download className="h-3 w-3 mr-1" />
+                      View
+                    </Button>
+                  </div>
+                )}
+
+                {cvFile && (
+                  <Button
+                    type="button"
+                    onClick={handleCvUpload}
+                    disabled={uploading}
+                    className="w-full"
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    {uploading ? "Uploading..." : "Upload CV File"}
+                  </Button>
+                )}
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="order_index">Order</Label>
