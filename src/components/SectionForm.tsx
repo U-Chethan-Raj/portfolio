@@ -332,15 +332,39 @@ const SectionForm = ({ section, onSave, onClose }: SectionFormProps) => {
                   <div className="flex items-center gap-2 p-2 bg-background rounded border">
                     <FileText className="h-4 w-4" />
                     <span className="text-sm flex-1">Current CV file uploaded</span>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() => window.open(formData.cv_file_url, '_blank')}
-                    >
-                      <Download className="h-3 w-3 mr-1" />
-                      View
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => window.open(formData.cv_file_url, '_blank')}
+                      >
+                        <Download className="h-3 w-3 mr-1" />
+                        View
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={async () => {
+                          if (!formData.cv_file_url) return;
+                          if (!confirm('Delete the current CV file?')) return;
+                          try {
+                            const parts = formData.cv_file_url.split('/cv-files/');
+                            if (parts.length > 1) {
+                              const path = parts[1];
+                              await supabase.storage.from('cv-files').remove([path]);
+                            }
+                            setFormData({ ...formData, cv_file_url: '' });
+                            toast({ title: 'Success', description: 'CV file deleted' });
+                          } catch (err: any) {
+                            toast({ title: 'Error', description: err.message, variant: 'destructive' });
+                          }
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    </div>
                   </div>
                 )}
 
