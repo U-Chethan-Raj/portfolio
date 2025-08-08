@@ -200,21 +200,21 @@ const Admin = () => {
               <TabsTrigger value="sections">Sections</TabsTrigger>
             </TabsList>
             
-            <div className="grid w-full grid-cols-3 lg:grid-cols-6 gap-2">
+            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 gap-2">
               <TabsTrigger value="experience" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Experience</TabsTrigger>
               <TabsTrigger value="projects" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Projects</TabsTrigger>
               <TabsTrigger value="certifications" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Certifications</TabsTrigger>
               <TabsTrigger value="participations" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Participations</TabsTrigger>
               <TabsTrigger value="skills" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Skills</TabsTrigger>
               <TabsTrigger value="education" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Education</TabsTrigger>
-            </div>
+            </TabsList>
             
-            <div className="grid w-full grid-cols-2 lg:grid-cols-4 gap-2">
+            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 gap-2">
               <TabsTrigger value="services" className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground">What I Do</TabsTrigger>
               <TabsTrigger value="professional_summary" className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground">Summary</TabsTrigger>
               <TabsTrigger value="key_achievements" className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground">Achievements</TabsTrigger>
               <TabsTrigger value="cv_download" className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground">CV Download</TabsTrigger>
-            </div>
+            </TabsList>
           </div>
 
           <TabsContent value="overview">
