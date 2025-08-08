@@ -6,9 +6,11 @@ import { supabase } from "@/integrations/supabase/client";
 
 const About = () => {
   const [experienceBlogs, setExperienceBlogs] = useState<any[]>([]);
+  const [servicesItems, setServicesItems] = useState<any[]>([]);
 
   useEffect(() => {
     fetchExperienceBlogs();
+    fetchServices();
   }, []);
 
   const fetchExperienceBlogs = async () => {
@@ -28,6 +30,29 @@ const About = () => {
     }
   };
 
+  const fetchServices = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('sections')
+        .select('title, content, data')
+        .eq('section_type', 'services')
+        .eq('published', true)
+        .order('order_index', { ascending: true })
+        .limit(1);
+
+      if (error) throw error;
+      const section = data?.[0] as any;
+      if (section) {
+        let items = Array.isArray(section?.data?.items) ? section.data.items : [];
+        if (!items.length && (section.title || section.content)) {
+          items = [{ title: section.title || 'Service', description: section.content || '' }];
+        }
+        setServicesItems(items);
+      }
+    } catch (error) {
+      console.error('Error fetching services section:', error);
+    }
+  };
   const skills = [
     "React", "Next.js", "TypeScript", "Node.js", "Python", "MongoDB", 
     "PostgreSQL", "AWS", "Docker", "Figma", "Tailwind CSS", "GraphQL"
@@ -55,6 +80,9 @@ const About = () => {
       description: "End-to-end development from database design to deployment and maintenance."
     }
   ];
+
+  const servicesToRender = servicesItems.length ? servicesItems : services;
+
 
   return (
     <section id="about" className="py-20 px-6">
@@ -122,19 +150,25 @@ const About = () => {
           {/* Services */}
           <div className="space-y-6">
             <h3 className="text-2xl font-semibold mb-6">What I Do</h3>
-            {services.map((service, index) => (
+            {servicesToRender.map((item: any, index: number) => (
               <Card 
-                key={service.title} 
+                key={item.title || index} 
                 className="card-gradient p-6 hover:shadow-card transition-smooth hover:scale-[1.02] cursor-pointer"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <div className="flex items-start gap-4">
                   <div className="bg-primary/20 p-3 rounded-lg">
-                    <service.icon className="h-6 w-6 text-primary" />
+                    {item.icon ? (
+                      // If an icon component is provided (static fallback items)
+                      <item.icon className="h-6 w-6 text-primary" />
+                    ) : (
+                      // Fallback icon for items loaded from the Sections table
+                      <Code className="h-6 w-6 text-primary" />
+                    )}
                   </div>
                   <div>
-                    <h4 className="text-lg font-semibold mb-2">{service.title}</h4>
-                    <p className="text-muted-foreground">{service.description}</p>
+                    <h4 className="text-lg font-semibold mb-2">{item.title}</h4>
+                    <p className="text-muted-foreground">{item.description}</p>
                   </div>
                 </div>
               </Card>
