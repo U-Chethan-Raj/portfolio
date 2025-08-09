@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { X, Upload, FileText, Download, Trash2, Eye } from "lucide-react";
+import { X, Upload, FileText, Download, Trash2, Eye, Plus, Minus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -458,20 +458,33 @@ const SectionForm = ({ section, onSave, onClose }: SectionFormProps) => {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="data">Additional Data (JSON)</Label>
-              <Textarea
-                id="data"
-                value={formData.data}
-                onChange={(e) => setFormData({ ...formData, data: e.target.value })}
-                rows={6}
-                placeholder='{"key": "value"}'
-                className="font-mono text-sm"
+            {/* Simplified editor for What I Do sections */}
+            {formData.section_type === 'services' ? (
+              <ServicesEditor 
+                data={formData.data}
+                onChange={(data) => setFormData({ ...formData, data })}
               />
-              <p className="text-xs text-muted-foreground">
-                Enter additional configuration data in JSON format
-              </p>
-            </div>
+            ) : formData.section_type === 'professional_summary' ? (
+              <ProfessionalSummaryEditor 
+                data={formData.data}
+                onChange={(data) => setFormData({ ...formData, data })}
+              />
+            ) : (
+              <div className="space-y-2">
+                <Label htmlFor="data">Additional Data (JSON)</Label>
+                <Textarea
+                  id="data"
+                  value={formData.data}
+                  onChange={(e) => setFormData({ ...formData, data: e.target.value })}
+                  rows={6}
+                  placeholder='{"key": "value"}'
+                  className="font-mono text-sm"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Enter additional configuration data in JSON format
+                </p>
+              </div>
+            )}
 
             <div className="flex items-center space-x-2">
               <Switch
@@ -493,6 +506,245 @@ const SectionForm = ({ section, onSave, onClose }: SectionFormProps) => {
           </form>
         </CardContent>
       </Card>
+    </div>
+  );
+};
+
+// Simplified editor for Services (What I Do) section
+const ServicesEditor = ({ data, onChange }: { data: string; onChange: (data: string) => void }) => {
+  const [services, setServices] = useState<any[]>([]);
+
+  useEffect(() => {
+    try {
+      const parsed = JSON.parse(data);
+      setServices(parsed.services || []);
+    } catch {
+      setServices([]);
+    }
+  }, [data]);
+
+  const updateData = (newServices: any[]) => {
+    const updatedData = JSON.stringify({ services: newServices }, null, 2);
+    onChange(updatedData);
+  };
+
+  const addService = () => {
+    const newService = {
+      title: "",
+      description: "",
+      icon: "Code"
+    };
+    const newServices = [...services, newService];
+    setServices(newServices);
+    updateData(newServices);
+  };
+
+  const removeService = (index: number) => {
+    const newServices = services.filter((_, i) => i !== index);
+    setServices(newServices);
+    updateData(newServices);
+  };
+
+  const updateService = (index: number, field: string, value: string) => {
+    const newServices = [...services];
+    newServices[index] = { ...newServices[index], [field]: value };
+    setServices(newServices);
+    updateData(newServices);
+  };
+
+  const iconOptions = ["Code", "Smartphone", "Palette", "Globe", "Settings", "Database", "Cloud", "Shield"];
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <Label className="text-base font-semibold">What I Do Services</Label>
+        <Button type="button" onClick={addService} size="sm">
+          <Plus className="h-4 w-4 mr-1" />
+          Add Service
+        </Button>
+      </div>
+      
+      {services.map((service, index) => (
+        <Card key={index} className="p-4">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="font-medium">Service {index + 1}</h4>
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm"
+                onClick={() => removeService(index)}
+              >
+                <Minus className="h-4 w-4" />
+              </Button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor={`service-title-${index}`}>Title</Label>
+                <Input
+                  id={`service-title-${index}`}
+                  value={service.title}
+                  onChange={(e) => updateService(index, 'title', e.target.value)}
+                  placeholder="e.g., Web Development"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor={`service-icon-${index}`}>Icon</Label>
+                <Select
+                  value={service.icon}
+                  onValueChange={(value) => updateService(index, 'icon', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select an icon" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {iconOptions.map((icon) => (
+                      <SelectItem key={icon} value={icon}>{icon}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            
+            <div>
+              <Label htmlFor={`service-desc-${index}`}>Description</Label>
+              <Textarea
+                id={`service-desc-${index}`}
+                value={service.description}
+                onChange={(e) => updateService(index, 'description', e.target.value)}
+                placeholder="Describe this service..."
+                rows={3}
+              />
+            </div>
+          </div>
+        </Card>
+      ))}
+      
+      {services.length === 0 && (
+        <div className="text-center py-8 text-muted-foreground">
+          <p>No services configured yet.</p>
+          <Button type="button" onClick={addService} variant="outline" className="mt-2">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Your First Service
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Simplified editor for Professional Summary section
+const ProfessionalSummaryEditor = ({ data, onChange }: { data: string; onChange: (data: string) => void }) => {
+  const [summary, setSummary] = useState<any[]>([]);
+
+  useEffect(() => {
+    try {
+      const parsed = JSON.parse(data);
+      setSummary(parsed.summary || []);
+    } catch {
+      setSummary([]);
+    }
+  }, [data]);
+
+  const updateData = (newSummary: any[]) => {
+    const updatedData = JSON.stringify({ summary: newSummary }, null, 2);
+    onChange(updatedData);
+  };
+
+  const addPoint = () => {
+    const newPoint = {
+      title: "",
+      description: "",
+      link: ""
+    };
+    const newSummary = [...summary, newPoint];
+    setSummary(newSummary);
+    updateData(newSummary);
+  };
+
+  const removePoint = (index: number) => {
+    const newSummary = summary.filter((_, i) => i !== index);
+    setSummary(newSummary);
+    updateData(newSummary);
+  };
+
+  const updatePoint = (index: number, field: string, value: string) => {
+    const newSummary = [...summary];
+    newSummary[index] = { ...newSummary[index], [field]: value };
+    setSummary(newSummary);
+    updateData(newSummary);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <Label className="text-base font-semibold">Professional Summary Points</Label>
+        <Button type="button" onClick={addPoint} size="sm">
+          <Plus className="h-4 w-4 mr-1" />
+          Add Point
+        </Button>
+      </div>
+      
+      {summary.map((point, index) => (
+        <Card key={index} className="p-4">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="font-medium">Point {index + 1}</h4>
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm"
+                onClick={() => removePoint(index)}
+              >
+                <Minus className="h-4 w-4" />
+              </Button>
+            </div>
+            
+            <div>
+              <Label htmlFor={`point-title-${index}`}>Title</Label>
+              <Input
+                id={`point-title-${index}`}
+                value={point.title}
+                onChange={(e) => updatePoint(index, 'title', e.target.value)}
+                placeholder="e.g., 5+ years in web development"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor={`point-desc-${index}`}>Description</Label>
+              <Textarea
+                id={`point-desc-${index}`}
+                value={point.description}
+                onChange={(e) => updatePoint(index, 'description', e.target.value)}
+                placeholder="Detailed description..."
+                rows={2}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor={`point-link-${index}`}>Link to Blog (optional)</Label>
+              <Input
+                id={`point-link-${index}`}
+                value={point.link}
+                onChange={(e) => updatePoint(index, 'link', e.target.value)}
+                placeholder="/blog/web-development-experience"
+              />
+            </div>
+          </div>
+        </Card>
+      ))}
+      
+      {summary.length === 0 && (
+        <div className="text-center py-8 text-muted-foreground">
+          <p>No summary points configured yet.</p>
+          <Button type="button" onClick={addPoint} variant="outline" className="mt-2">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Your First Point
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
