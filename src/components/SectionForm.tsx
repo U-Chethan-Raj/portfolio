@@ -38,8 +38,9 @@ const SectionForm = ({ section, onSave, onClose }: SectionFormProps) => {
   const sectionTypes = [
     { value: "hero", label: "Hero Section" },
     { value: "about", label: "About Section" },
-    { value: "services", label: "What I Do" },
-    { value: "professional_summary", label: "Professional Summary" },
+    { value: "what-i-do", label: "What I Do" },
+    { value: "skills", label: "Skills & Technologies" },
+    { value: "professional-summary", label: "Professional Summary" },
     { value: "key_achievements", label: "Key Achievements" },
     { value: "cv_download", label: "CV Download" },
     { value: "projects", label: "Projects Section" },
@@ -458,13 +459,18 @@ const SectionForm = ({ section, onSave, onClose }: SectionFormProps) => {
               />
             </div>
 
-            {/* Simplified editor for What I Do sections */}
-            {formData.section_type === 'services' ? (
+            {/* Section-specific editors */}
+            {formData.section_type === 'what-i-do' ? (
               <ServicesEditor 
                 data={formData.data}
                 onChange={(data) => setFormData({ ...formData, data })}
               />
-            ) : formData.section_type === 'professional_summary' ? (
+            ) : formData.section_type === 'skills' ? (
+              <SkillsEditor 
+                data={formData.data}
+                onChange={(data) => setFormData({ ...formData, data })}
+              />
+            ) : formData.section_type === 'professional-summary' ? (
               <ProfessionalSummaryEditor 
                 data={formData.data}
                 onChange={(data) => setFormData({ ...formData, data })}
@@ -635,113 +641,191 @@ const ServicesEditor = ({ data, onChange }: { data: string; onChange: (data: str
   );
 };
 
-// Simplified editor for Professional Summary section
-const ProfessionalSummaryEditor = ({ data, onChange }: { data: string; onChange: (data: string) => void }) => {
-  const [summary, setSummary] = useState<any[]>([]);
+// Skills editor component
+const SkillsEditor = ({ data, onChange }: { data: string; onChange: (data: string) => void }) => {
+  const [skills, setSkills] = useState<string[]>([]);
+  const [newSkill, setNewSkill] = useState("");
 
   useEffect(() => {
     try {
       const parsed = JSON.parse(data);
-      setSummary(parsed.summary || []);
+      setSkills(parsed.skills || []);
     } catch {
-      setSummary([]);
+      setSkills([]);
     }
   }, [data]);
 
-  const updateData = (newSummary: any[]) => {
-    const updatedData = JSON.stringify({ summary: newSummary }, null, 2);
+  const updateData = (newSkills: string[]) => {
+    const updatedData = JSON.stringify({ skills: newSkills }, null, 2);
     onChange(updatedData);
   };
 
-  const addPoint = () => {
-    const newPoint = {
-      title: "",
-      description: "",
-      link: ""
-    };
-    const newSummary = [...summary, newPoint];
-    setSummary(newSummary);
-    updateData(newSummary);
+  const addSkill = () => {
+    if (newSkill.trim() && !skills.includes(newSkill.trim())) {
+      const newSkills = [...skills, newSkill.trim()];
+      setSkills(newSkills);
+      updateData(newSkills);
+      setNewSkill("");
+    }
   };
 
-  const removePoint = (index: number) => {
-    const newSummary = summary.filter((_, i) => i !== index);
-    setSummary(newSummary);
-    updateData(newSummary);
+  const removeSkill = (skillToRemove: string) => {
+    const newSkills = skills.filter(skill => skill !== skillToRemove);
+    setSkills(newSkills);
+    updateData(newSkills);
   };
 
-  const updatePoint = (index: number, field: string, value: string) => {
-    const newSummary = [...summary];
-    newSummary[index] = { ...newSummary[index], [field]: value };
-    setSummary(newSummary);
-    updateData(newSummary);
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addSkill();
+    }
   };
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <Label className="text-base font-semibold">Professional Summary Points</Label>
-        <Button type="button" onClick={addPoint} size="sm">
-          <Plus className="h-4 w-4 mr-1" />
-          Add Point
+        <Label className="text-base font-semibold">Skills & Technologies</Label>
+      </div>
+      
+      <div className="flex gap-2">
+        <Input
+          value={newSkill}
+          onChange={(e) => setNewSkill(e.target.value)}
+          onKeyPress={handleKeyPress}
+          placeholder="Add a new skill..."
+          className="flex-1"
+        />
+        <Button type="button" onClick={addSkill} size="sm">
+          <Plus className="h-4 w-4" />
         </Button>
       </div>
       
-      {summary.map((point, index) => (
+      <div className="flex flex-wrap gap-2">
+        {skills.map((skill, index) => (
+          <div key={index} className="flex items-center gap-1 bg-secondary px-3 py-1 rounded-full">
+            <span className="text-sm">{skill}</span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-4 w-4 p-0 hover:bg-destructive hover:text-destructive-foreground"
+              onClick={() => removeSkill(skill)}
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+        ))}
+      </div>
+      
+      {skills.length === 0 && (
+        <div className="text-center py-8 text-muted-foreground">
+          <p>No skills added yet.</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Professional Summary editor with blog links
+const ProfessionalSummaryEditor = ({ data, onChange }: { data: string; onChange: (data: string) => void }) => {
+  const [experiences, setExperiences] = useState<any[]>([]);
+
+  useEffect(() => {
+    try {
+      const parsed = JSON.parse(data);
+      setExperiences(parsed.experiences || []);
+    } catch {
+      setExperiences([]);
+    }
+  }, [data]);
+
+  const updateData = (newExperiences: any[]) => {
+    const updatedData = JSON.stringify({ experiences: newExperiences }, null, 2);
+    onChange(updatedData);
+  };
+
+  const addExperience = () => {
+    const newExperience = {
+      text: "",
+      blogSlug: ""
+    };
+    const newExperiences = [...experiences, newExperience];
+    setExperiences(newExperiences);
+    updateData(newExperiences);
+  };
+
+  const removeExperience = (index: number) => {
+    const newExperiences = experiences.filter((_, i) => i !== index);
+    setExperiences(newExperiences);
+    updateData(newExperiences);
+  };
+
+  const updateExperience = (index: number, field: string, value: string) => {
+    const newExperiences = [...experiences];
+    newExperiences[index] = { ...newExperiences[index], [field]: value };
+    setExperiences(newExperiences);
+    updateData(newExperiences);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <Label className="text-base font-semibold">Professional Summary with Blog Links</Label>
+        <Button type="button" onClick={addExperience} size="sm">
+          <Plus className="h-4 w-4 mr-1" />
+          Add Experience
+        </Button>
+      </div>
+      
+      {experiences.map((experience, index) => (
         <Card key={index} className="p-4">
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h4 className="font-medium">Point {index + 1}</h4>
+              <h4 className="font-medium">Experience {index + 1}</h4>
               <Button 
                 type="button" 
                 variant="outline" 
                 size="sm"
-                onClick={() => removePoint(index)}
+                onClick={() => removeExperience(index)}
               >
                 <Minus className="h-4 w-4" />
               </Button>
             </div>
             
             <div>
-              <Label htmlFor={`point-title-${index}`}>Title</Label>
-              <Input
-                id={`point-title-${index}`}
-                value={point.title}
-                onChange={(e) => updatePoint(index, 'title', e.target.value)}
-                placeholder="e.g., 5+ years in web development"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor={`point-desc-${index}`}>Description</Label>
+              <Label htmlFor={`exp-text-${index}`}>Summary Text</Label>
               <Textarea
-                id={`point-desc-${index}`}
-                value={point.description}
-                onChange={(e) => updatePoint(index, 'description', e.target.value)}
-                placeholder="Detailed description..."
+                id={`exp-text-${index}`}
+                value={experience.text}
+                onChange={(e) => updateExperience(index, 'text', e.target.value)}
+                placeholder="e.g., 5+ years of experience in full-stack development"
                 rows={2}
               />
             </div>
             
             <div>
-              <Label htmlFor={`point-link-${index}`}>Link to Blog (optional)</Label>
+              <Label htmlFor={`exp-blog-${index}`}>Blog Slug (for linking)</Label>
               <Input
-                id={`point-link-${index}`}
-                value={point.link}
-                onChange={(e) => updatePoint(index, 'link', e.target.value)}
-                placeholder="/blog/web-development-experience"
+                id={`exp-blog-${index}`}
+                value={experience.blogSlug}
+                onChange={(e) => updateExperience(index, 'blogSlug', e.target.value)}
+                placeholder="web-development-experience"
               />
+              <p className="text-xs text-muted-foreground mt-1">
+                This will link to /blog/{experience.blogSlug || 'your-slug'}
+              </p>
             </div>
           </div>
         </Card>
       ))}
       
-      {summary.length === 0 && (
+      {experiences.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
-          <p>No summary points configured yet.</p>
-          <Button type="button" onClick={addPoint} variant="outline" className="mt-2">
+          <p>No experiences configured yet.</p>
+          <Button type="button" onClick={addExperience} variant="outline" className="mt-2">
             <Plus className="h-4 w-4 mr-2" />
-            Add Your First Point
+            Add Your First Experience
           </Button>
         </div>
       )}

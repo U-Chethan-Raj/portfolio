@@ -1,60 +1,49 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Code, Palette, Smartphone, Globe } from "lucide-react";
+import * as Icons from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const About = () => {
-  const [experienceBlogs, setExperienceBlogs] = useState<any[]>([]);
+  const [professionalSummary, setProfessionalSummary] = useState<any>(null);
+  const [skills, setSkills] = useState<string[]>([]);
+  const [services, setServices] = useState<any[]>([]);
 
   useEffect(() => {
-    fetchExperienceBlogs();
+    fetchSections();
   }, []);
 
-  const fetchExperienceBlogs = async () => {
+  const fetchSections = async () => {
     try {
       const { data, error } = await supabase
-        .from('blogs')
+        .from('sections')
         .select('*')
         .eq('published', true)
-        .eq('category', 'experience')
-        .order('created_at', { ascending: false })
-        .limit(5);
+        .in('section_type', ['professional-summary', 'skills', 'what-i-do'])
+        .order('order_index', { ascending: true });
 
       if (error) throw error;
-      setExperienceBlogs(data || []);
+
+      data?.forEach((section) => {
+        if (section.section_type === 'professional-summary') {
+          setProfessionalSummary(section);
+        } else if (section.section_type === 'skills') {
+          const sectionData = section.data as any;
+          setSkills(sectionData?.skills || []);
+        } else if (section.section_type === 'what-i-do') {
+          const sectionData = section.data as any;
+          setServices(sectionData?.services || []);
+        }
+      });
     } catch (error) {
-      console.error('Error fetching experience blogs:', error);
+      console.error('Error fetching sections:', error);
     }
   };
 
-  const skills = [
-    "React", "Next.js", "TypeScript", "Node.js", "Python", "MongoDB", 
-    "PostgreSQL", "AWS", "Docker", "Figma", "Tailwind CSS", "GraphQL"
-  ];
-
-  const services = [
-    {
-      icon: Code,
-      title: "Web Development",
-      description: "Building responsive and performant web applications using modern frameworks and technologies."
-    },
-    {
-      icon: Smartphone,
-      title: "Mobile Development",
-      description: "Creating cross-platform mobile applications with React Native and native technologies."
-    },
-    {
-      icon: Palette,
-      title: "UI/UX Design",
-      description: "Designing intuitive and beautiful user interfaces with focus on user experience."
-    },
-    {
-      icon: Globe,
-      title: "Full Stack Solutions",
-      description: "End-to-end development from database design to deployment and maintenance."
-    }
-  ];
+  const getIconComponent = (iconName: string) => {
+    const IconComponent = (Icons as any)[iconName];
+    return IconComponent || Icons.Code;
+  };
 
   return (
     <section id="about" className="py-20 px-6">
@@ -73,32 +62,31 @@ const About = () => {
           {/* About Text */}
           <div className="space-y-6">
             <div className="card-gradient rounded-2xl p-8 shadow-card">
-              <h3 className="text-2xl font-semibold mb-4">My Journey</h3>
+              <h3 className="text-2xl font-semibold mb-4">
+                {professionalSummary?.subtitle || "My Journey"}
+              </h3>
               <div className="space-y-4 text-muted-foreground">
-                {experienceBlogs.length > 0 ? experienceBlogs.map((blog) => (
-                  <div 
-                    key={blog.id}
-                    className="group cursor-pointer relative" 
-                    onClick={() => window.open(`/blog/${blog.slug}`, '_blank')}
-                  >
-                    <p className="hover:text-foreground transition-smooth">
-                      <span className="font-semibold text-primary">{blog.title}</span> - {blog.excerpt}
-                      <span className="text-primary ml-2 opacity-0 group-hover:opacity-100 transition-smooth">→ Read more</span>
-                    </p>
-                    
-                    {/* Hover preview */}
-                    <div className="absolute left-full top-0 ml-4 w-80 bg-card border border-border rounded-lg p-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-10 shadow-lg">
-                      <img src={blog.image_url || "/placeholder.svg"} alt={blog.title} className="w-full h-32 object-cover rounded-md mb-3" />
-                      <h4 className="font-semibold text-sm mb-2">{blog.title}</h4>
-                      <p className="text-xs text-muted-foreground">{blog.excerpt}</p>
+                {professionalSummary?.data?.experiences?.length > 0 ? 
+                  professionalSummary.data.experiences.map((experience: any, index: number) => (
+                    <div 
+                      key={index}
+                      className="group cursor-pointer" 
+                      onClick={() => experience.blogSlug && window.open(`/blog/${experience.blogSlug}`, '_blank')}
+                    >
+                      <p className="hover:text-foreground transition-smooth">
+                        {experience.text}
+                        {experience.blogSlug && (
+                          <span className="text-primary ml-2 opacity-0 group-hover:opacity-100 transition-smooth">→ Read more</span>
+                        )}
+                      </p>
                     </div>
-                  </div>
-                )) : (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground">No experience posts available yet.</p>
-                    <p className="text-sm text-muted-foreground mt-2">Add some experience blogs through the admin panel to showcase your journey.</p>
-                  </div>
-                )}
+                  )) : (
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground">No professional summary available yet.</p>
+                      <p className="text-sm text-muted-foreground mt-2">Add professional summary through the admin panel.</p>
+                    </div>
+                  )
+                }
               </div>
             </div>
 
@@ -122,23 +110,31 @@ const About = () => {
           {/* Services */}
           <div className="space-y-6">
             <h3 className="text-2xl font-semibold mb-6">What I Do</h3>
-            {services.map((service, index) => (
-              <Card 
-                key={service.title} 
-                className="card-gradient p-6 hover:shadow-card transition-smooth hover:scale-[1.02] cursor-pointer"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <div className="flex items-start gap-4">
-                  <div className="bg-primary/20 p-3 rounded-lg">
-                    <service.icon className="h-6 w-6 text-primary" />
+            {services.length > 0 ? services.map((service, index) => {
+              const IconComponent = getIconComponent(service.icon);
+              return (
+                <Card 
+                  key={service.title} 
+                  className="card-gradient p-6 hover:shadow-card transition-smooth hover:scale-[1.02] cursor-pointer"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="bg-primary/20 p-3 rounded-lg">
+                      <IconComponent className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-semibold mb-2">{service.title}</h4>
+                      <p className="text-muted-foreground">{service.description}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="text-lg font-semibold mb-2">{service.title}</h4>
-                    <p className="text-muted-foreground">{service.description}</p>
-                  </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              );
+            }) : (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">No services configured yet.</p>
+                <p className="text-sm text-muted-foreground mt-2">Add services through the admin panel.</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
