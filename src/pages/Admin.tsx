@@ -431,9 +431,9 @@ const Admin = () => {
                         </CardHeader>
                         <CardContent>
                           <div className="space-y-4">
-                            {section.section_type === 'what-i-do' && section.data && (
+                            {section.section_type === 'what-i-do' && Array.isArray(section.data) && (
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {(section.data as any[]).map((service: any, index: number) => (
+                                {section.data.map((service: any, index: number) => (
                                   <div key={index} className="p-3 border rounded-lg">
                                     <h4 className="font-medium">{service.title}</h4>
                                     <p className="text-sm text-muted-foreground mt-1">{service.description}</p>
@@ -444,18 +444,18 @@ const Admin = () => {
                                 ))}
                               </div>
                             )}
-                            {section.section_type === 'skills' && section.data && (
+                            {section.section_type === 'skills' && Array.isArray(section.data) && (
                               <div className="flex flex-wrap gap-2">
-                                {(section.data as string[]).map((skill: string, index: number) => (
+                                {section.data.map((skill: string, index: number) => (
                                   <span key={index} className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
                                     {skill}
                                   </span>
                                 ))}
                               </div>
                             )}
-                            {section.section_type === 'professional-summary' && section.data && (
+                            {section.section_type === 'professional-summary' && Array.isArray(section.data) && (
                               <div className="space-y-2">
-                                {(section.data as any[]).map((item: any, index: number) => (
+                                {section.data.map((item: any, index: number) => (
                                   <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                                     <span className="text-sm">{item.text}</span>
                                     {item.blogSlug && (
