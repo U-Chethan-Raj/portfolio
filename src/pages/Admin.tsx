@@ -375,69 +375,184 @@ const Admin = () => {
             </div>
           </TabsContent>
 
-          {allTabs.map((category) => (
-            <TabsContent key={category.id} value={category.id}>
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold">{category.label}</h2>
-                <Button onClick={() => handleNewBlog(category.id)}>
-                  <PlusCircle className="h-4 w-4 mr-2" />
-                  New {category.label.endsWith('s') ? category.label.slice(0, -1) : category.label}
-                </Button>
-              </div>
+          {allTabs.map((category) => {
+            // Special handling for section-based tabs
+            const sectionTypes = ['services', 'skills', 'professional_summary'];
+            const isSectionTab = sectionTypes.includes(category.id);
+            
+            if (isSectionTab) {
+              const sectionTypeMap = {
+                'services': 'what-i-do',
+                'skills': 'skills', 
+                'professional_summary': 'professional-summary'
+              };
+              const sectionType = sectionTypeMap[category.id as keyof typeof sectionTypeMap];
+              const sectionData = sections.filter(section => section.section_type === sectionType);
+              
+              return (
+                <TabsContent key={category.id} value={category.id}>
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold">{category.label}</h2>
+                    <Button onClick={handleNewSection}>
+                      <PlusCircle className="h-4 w-4 mr-2" />
+                      Edit {category.label}
+                    </Button>
+                  </div>
 
-              <div className="grid gap-6">
-                {blogs
-                  .filter(blog => blog.category === category.id)
-                  .map((blog) => (
-                    <Card key={blog.id}>
-                      <CardHeader>
-                        <div className="flex justify-between items-start">
-                          <CardTitle>{blog.title}</CardTitle>
-                          <div className="flex gap-2">
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleEditBlog(blog)}
-                            >
-                              <Edit className="h-3 w-3 mr-1" />
-                              Edit
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleDeleteBlog(blog.id)}
-                            >
-                              <Trash2 className="h-3 w-3 mr-1" />
-                              Delete
-                            </Button>
+                  <div className="grid gap-6">
+                    {sectionData.map((section) => (
+                      <Card key={section.id}>
+                        <CardHeader>
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <CardTitle className="flex items-center gap-2">
+                                {section.title}
+                                <span className="text-sm bg-muted px-2 py-1 rounded">
+                                  {section.section_type}
+                                </span>
+                              </CardTitle>
+                              {section.subtitle && (
+                                <p className="text-sm text-muted-foreground mt-1">
+                                  {section.subtitle}
+                                </p>
+                              )}
+                            </div>
+                            <div className="flex gap-2">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleEditSection(section)}
+                              >
+                                <Edit className="h-3 w-3 mr-1" />
+                                Edit
+                              </Button>
+                            </div>
                           </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-muted-foreground mb-4">{blog.excerpt}</p>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-                          <span>Status: {blog.published ? 'Published' : 'Draft'}</span>
-                          <span>Created: {new Date(blog.created_at).toLocaleDateString()}</span>
-                        </div>
-                        {blog.attachments && blog.attachments.length > 0 && (
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <span>Attachments: {blog.attachments.length}</span>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-4">
+                            {section.section_type === 'what-i-do' && section.data && (
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {(section.data as any[]).map((service: any, index: number) => (
+                                  <div key={index} className="p-3 border rounded-lg">
+                                    <h4 className="font-medium">{service.title}</h4>
+                                    <p className="text-sm text-muted-foreground mt-1">{service.description}</p>
+                                    <span className="text-xs bg-secondary px-2 py-1 rounded mt-2 inline-block">
+                                      Icon: {service.icon}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            {section.section_type === 'skills' && section.data && (
+                              <div className="flex flex-wrap gap-2">
+                                {(section.data as string[]).map((skill: string, index: number) => (
+                                  <span key={index} className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
+                                    {skill}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                            {section.section_type === 'professional-summary' && section.data && (
+                              <div className="space-y-2">
+                                {(section.data as any[]).map((item: any, index: number) => (
+                                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                                    <span className="text-sm">{item.text}</span>
+                                    {item.blogSlug && (
+                                      <span className="text-xs bg-secondary px-2 py-1 rounded">
+                                        Blog: {item.blogSlug}
+                                      </span>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
-                        )}
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground mt-4">
+                            <span>Status: {section.published ? 'Published' : 'Draft'}</span>
+                            <span>Order: {section.order_index}</span>
+                            <span>Created: {new Date(section.created_at).toLocaleDateString()}</span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                    {sectionData.length === 0 && (
+                      <Card>
+                        <CardContent className="flex items-center justify-center h-32">
+                          <p className="text-muted-foreground">No {category.label.toLowerCase()} section found. Create one!</p>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                </TabsContent>
+              );
+            }
+            
+            // Regular blog-based tabs
+            return (
+              <TabsContent key={category.id} value={category.id}>
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold">{category.label}</h2>
+                  <Button onClick={() => handleNewBlog(category.id)}>
+                    <PlusCircle className="h-4 w-4 mr-2" />
+                    New {category.label.endsWith('s') ? category.label.slice(0, -1) : category.label}
+                  </Button>
+                </div>
+
+                <div className="grid gap-6">
+                  {blogs
+                    .filter(blog => blog.category === category.id)
+                    .map((blog) => (
+                      <Card key={blog.id}>
+                        <CardHeader>
+                          <div className="flex justify-between items-start">
+                            <CardTitle>{blog.title}</CardTitle>
+                            <div className="flex gap-2">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleEditBlog(blog)}
+                              >
+                                <Edit className="h-3 w-3 mr-1" />
+                                Edit
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleDeleteBlog(blog.id)}
+                              >
+                                <Trash2 className="h-3 w-3 mr-1" />
+                                Delete
+                              </Button>
+                            </div>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-muted-foreground mb-4">{blog.excerpt}</p>
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
+                            <span>Status: {blog.published ? 'Published' : 'Draft'}</span>
+                            <span>Created: {new Date(blog.created_at).toLocaleDateString()}</span>
+                          </div>
+                          {blog.attachments && blog.attachments.length > 0 && (
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <span>Attachments: {blog.attachments.length}</span>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  {blogs.filter(blog => blog.category === category.id).length === 0 && (
+                    <Card>
+                      <CardContent className="text-center py-8">
+                        <p className="text-muted-foreground">No {category.label.toLowerCase()} entries yet.</p>
+                        <p className="text-sm text-muted-foreground mt-2">Click "New {category.label.endsWith('s') ? category.label.slice(0, -1) : category.label}" to add your first entry.</p>
                       </CardContent>
                     </Card>
-                  ))}
-                {blogs.filter(blog => blog.category === category.id).length === 0 && (
-                  <Card>
-                    <CardContent className="text-center py-8">
-                      <p className="text-muted-foreground">No {category.label.toLowerCase()} entries yet.</p>
-                      <p className="text-sm text-muted-foreground mt-2">Click "New {category.label.endsWith('s') ? category.label.slice(0, -1) : category.label}" to add your first entry.</p>
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-            </TabsContent>
-          ))}
+                  )}
+                </div>
+              </TabsContent>
+            );
+          })}
         </Tabs>
 
         {showBlogForm && (
